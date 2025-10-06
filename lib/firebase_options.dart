@@ -41,30 +41,30 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBFG_5S5q92llJOXsrNmsZ8EDcfdsXOLQA',
-    appId: '1:161223041926:web:f5bb12f4f5aee5b28e4207',
-    messagingSenderId: '161223041926',
-    projectId: 'apk-novel',
-    authDomain: 'apk-novel.firebaseapp.com',
-    storageBucket: 'apk-novel.firebasestorage.app',
-    measurementId: 'G-1LZN260QK6',
+    apiKey: 'AIzaSyCDn0CT7k3KqJRoYwJiZBmBCkPISQmmJp8',
+    appId: '1:322654127219:web:2fdf17acbd89a7759a9606',
+    messagingSenderId: '322654127219',
+    projectId: 'novel-flutter-4b1cf',
+    authDomain: 'novel-flutter-4b1cf.firebaseapp.com',
+    storageBucket: 'novel-flutter-4b1cf.firebasestorage.app',
+    measurementId: 'G-ZZEQJFWW4W',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAjeT6PnUwP7ciYGmxH554yvanDlxtI5DY',
-    appId: '1:161223041926:android:c6cbfeafacdc32eb8e4207',
-    messagingSenderId: '161223041926',
-    projectId: 'apk-novel',
-    storageBucket: 'apk-novel.firebasestorage.app',
+    apiKey: 'AIzaSyCzY204cOGnEqzZLtPAsE54KFATch-2W1A',
+    appId: '1:322654127219:android:2ca0c27d5f4e091c9a9606',
+    messagingSenderId: '322654127219',
+    projectId: 'novel-flutter-4b1cf',
+    storageBucket: 'novel-flutter-4b1cf.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAGYuAGVtoY2WJVYyGFkpvWtO9x--OYDjI',
-    appId: '1:161223041926:ios:2640f496f09fee6c8e4207',
-    messagingSenderId: '161223041926',
-    projectId: 'apk-novel',
-    storageBucket: 'apk-novel.firebasestorage.app',
-    iosBundleId: 'com.example.buatCeritaFix',
+    apiKey: 'AIzaSyBrEPN_8zhfBmdLsB3_Cro1y5ange9xEGU',
+    appId: '1:322654127219:ios:19be8d62cd401b849a9606',
+    messagingSenderId: '322654127219',
+    projectId: 'novel-flutter-4b1cf',
+    storageBucket: 'novel-flutter-4b1cf.firebasestorage.app',
+    iosBundleId: 'com.example.buatCerita',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(

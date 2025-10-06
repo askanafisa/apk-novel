@@ -6,6 +6,8 @@ class AppSnackbars {
     final ctx = messengerKey.currentContext;
     if (ctx == null) return;
 
+    final isDark = Theme.of(ctx).brightness == Brightness.dark;
+
     final snack = SnackBar(
       behavior: SnackBarBehavior.floating,
       duration: const Duration(milliseconds: 1500),
@@ -15,9 +17,20 @@ class AppSnackbars {
       ),
       content: Row(
         children: [
-          Icon(icon, color: Colors.white),
+          Icon(
+            icon,
+            color: Colors.white, // ikon tetap putih biar kontras
+          ),
           const SizedBox(width: 8),
-          Expanded(child: Text(message)),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: isDark ? const Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 255, 255, 255), // teks adaptif
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );

@@ -1,5 +1,8 @@
+import 'package:buat_cerita/crud_test_page.dart';
+import 'package:buat_cerita/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'splash_screen.dart';
 import 'login_page.dart';
 import 'register_page.dart';
@@ -9,7 +12,11 @@ final messengerKey = GlobalKey<ScaffoldMessengerState>();
 bool globalIsDarkMode = false;
 Function(bool)? globalToggleTheme;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -58,10 +65,9 @@ class _MyAppState extends State<MyApp> {
         '/splash': (context) => SplashScreen(),
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
-        '/main': (context) => MainPage(
-              toggleTheme: toggleTheme,
-              isDarkMode: isDarkMode,
-            ),
+        '/main': (context) =>
+            MainPage(toggleTheme: toggleTheme, isDarkMode: isDarkMode),
+            '/crud':(context) => const CrudTestPage(),
       },
     );
   }

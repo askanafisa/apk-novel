@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'data_novel.dart';
-import 'app_gradients.dart'; 
+import 'app_gradients.dart';
 import 'reading_page.dart';
 
 class DetailPage extends StatefulWidget {
@@ -32,6 +32,14 @@ class _DetailPageState extends State<DetailPage> {
     }
   }
 
+  Future<void> saveLastReadChapter(int chapterIndex) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('last_read_chapter_${widget.novel.title}', chapterIndex);
+    setState(() {
+      lastReadChapter = chapterIndex;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -39,7 +47,9 @@ class _DetailPageState extends State<DetailPage> {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: isDark ? AppGradients.darkGradient : AppGradients.lightGradient,
+          gradient: isDark
+              ? AppGradients.darkGradient
+              : AppGradients.lightGradient,
         ),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -88,7 +98,9 @@ class _DetailPageState extends State<DetailPage> {
                   Row(
                     children: List.generate(5, (index) {
                       return Icon(
-                        index < widget.novel.rating ? Icons.star : Icons.star_border,
+                        index < widget.novel.rating
+                            ? Icons.star
+                            : Icons.star_border,
                         color: Colors.amber,
                         size: 24,
                       );
@@ -129,7 +141,7 @@ class _DetailPageState extends State<DetailPage> {
               ),
               const SizedBox(height: 24),
 
-              // 🔄 TOMBOL LANJUTKAN MEMBACA
+              // 🔄 Tombol Lanjutkan Membaca
               if (lastReadChapter != null)
                 Center(
                   child: ElevatedButton.icon(
@@ -142,41 +154,63 @@ class _DetailPageState extends State<DetailPage> {
                             initialChapter: lastReadChapter!,
                           ),
                         ),
-                      );
+                      ).then((_) {
+                        loadLastReadChapter(); // refresh otomatis setelah keluar
+                      });
                     },
-                    icon: const Icon(Icons.menu_book),
-                    label: Text('📚 Lanjutkan Bab ${lastReadChapter! + 1}'),
+                    icon: const Icon(Icons.menu_book, color: Colors.white),
+                    label: Text(
+                      "📚 Lanjutkan Bab ${lastReadChapter! + 1}",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      backgroundColor: Colors.deepPurple,
                     ),
                   ),
                 ),
 
               const SizedBox(height: 16),
 
-              // Tombol Mulai Membaca
-              Center(
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ReadingPage(novel: widget.novel),
+              // Tombol Mulai Membaca (hanya muncul kalau belum ada progres)
+              if (lastReadChapter == null)
+                Center(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.menu_book),
-                  label: const Text(
-                    "📖 Mulai Membaca 📖",
-                    style: TextStyle(color: Colors.white),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ReadingPage(
+                            novel: widget.novel,
+                            initialChapter: 0,
+                          ),
+                        ),
+                      ).then((_) {
+                        loadLastReadChapter(); // langsung cek lagi setelah keluar
+                      });
+                    },
+                    icon: const Icon(Icons.menu_book, color: Colors.white),
+                    label: const Text(
+                      "📖 Mulai Membaca 📖",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
-              ),
+
               const SizedBox(height: 24),
 
               // Daftar Bab
@@ -197,9 +231,14 @@ class _DetailPageState extends State<DetailPage> {
                 itemBuilder: (context, index) {
                   return Card(
                     color: Theme.of(context).cardColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: ListTile(
-                      leading: Icon(Icons.book, color: Theme.of(context).colorScheme.primary),
+                      leading: Icon(
+                        Icons.book,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                       title: Text("Bab ${index + 1}"),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
@@ -211,7 +250,9 @@ class _DetailPageState extends State<DetailPage> {
                               initialChapter: index,
                             ),
                           ),
-                        );
+                        ).then((_) {
+                          saveLastReadChapter(index);
+                        });
                       },
                     ),
                   );

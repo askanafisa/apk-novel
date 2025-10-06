@@ -56,7 +56,10 @@ class _MainPageState extends State<MainPage> {
     });
 
     // ✅ SnackBar untuk perpustakaan
-    AppSnackbars.show("Ditambahkan ke Perpustakaan 📚", icon: Icons.library_add_check);
+    AppSnackbars.show(
+      "Ditambahkan ke Perpustakaan 📚",
+      icon: Icons.library_add_check,
+    );
 
     // (opsional) kalau mau otomatis pindah ke tab Perpustakaan, buka komentar ini:
     // setState(() => _currentIndex = 1);
@@ -69,11 +72,22 @@ class _MainPageState extends State<MainPage> {
         favorites: favorites,
         onToggleFavorite: toggleFavorite,
         onAddToLibrary: addToLibrary,
+        library: library,
         isDarkMode: widget.isDarkMode,
         onToggleTheme: widget.toggleTheme,
       ),
-      LibraryPage(library: library),
-      FavoritePage(favorites: favorites),
+      LibraryPage(
+        library: library,
+        onRemove: (novel) {
+          setState(() => library.remove(novel));
+        },
+      ),
+      FavoritePage(
+        favorites: favorites,
+        onRemove: (novel) {
+          setState(() => favorites.remove(novel));
+        },
+      ),
       const ProfilePage(),
     ];
 
@@ -87,7 +101,10 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Perpustakaan'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book),
+            label: 'Perpustakaan',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorit'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],

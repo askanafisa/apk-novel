@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "322654127219",
+    "project_id": "novel-flutter-4b1cf",
+    "storage_bucket": "novel-flutter-4b1cf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:322654127219:android:2ca0c27d5f4e091c9a9606",
+        "android_client_info": {
+          "package_name": "com.example.buat_cerita"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzY204cOGnEqzZLtPAsE54KFATch-2W1A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

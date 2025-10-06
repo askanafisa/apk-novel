@@ -8,6 +8,7 @@ class HomePage extends StatefulWidget {
   final List<Novel> favorites;
   final Function(Novel) onToggleFavorite;
   final Function(Novel) onAddToLibrary;
+  final List<Novel> library;
   final bool isDarkMode;
   final Function(bool) onToggleTheme;
 
@@ -16,6 +17,7 @@ class HomePage extends StatefulWidget {
     required this.favorites,
     required this.onToggleFavorite,
     required this.onAddToLibrary,
+    required this.library,
     required this.isDarkMode,
     required this.onToggleTheme,
   });
@@ -61,12 +63,61 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // ---------- NEW: Populer builder (filter hanya berdasarkan search, bukan genre) ----------
+  Widget buildPopulerSection(String title, List<Novel> novels) {
+    final q = searchQuery.trim().toLowerCase();
+
+    // Populer: hanya filter berdasarkan search (judul/author/genre) — TIDAK terpengaruh selectedGenre
+    final filteredPopuler = novels.where((novel) {
+      if (q.isEmpty) return true;
+      final t = novel.title.toLowerCase();
+      final a = novel.author.toLowerCase();
+      final g = novel.genre.toLowerCase();
+      return t.contains(q) || a.contains(q) || g.contains(q);
+    }).toList();
+
+    if (filteredPopuler.isEmpty) return const SizedBox();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionTitle(title: title),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 300,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: filteredPopuler.length,
+            itemBuilder: (context, index) {
+              final novel = filteredPopuler[index];
+              final isFavorite = widget.favorites.contains(novel);
+              final isInLibrary = widget.library.contains(novel);
+              return NovelCard(
+                novel: novel,
+                isFavorite: isFavorite,
+                onToggleFavorite: () => widget.onToggleFavorite(novel),
+                onAddToLibrary: () => widget.onAddToLibrary(novel),
+                isInLibrary: isInLibrary,
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  // ---------- Existing: general section (search + genre) ----------
   Widget buildSection(String title, List<Novel> novels) {
+    final q = searchQuery.trim().toLowerCase();
     final filteredNovels = novels.where((novel) {
-      final matchesSearch = novel.title.toLowerCase().contains(searchQuery.toLowerCase()) ||
-                          novel.author.toLowerCase().contains(searchQuery.toLowerCase()) ||
-                          novel.genre.toLowerCase().contains(searchQuery.toLowerCase());
-      final matchesGenre = selectedGenre == 'Semua' || novel.genre == selectedGenre;
+      final matchesSearch =
+          q.isEmpty ||
+          novel.title.toLowerCase().contains(q) ||
+          novel.author.toLowerCase().contains(q) ||
+          novel.genre.toLowerCase().contains(q);
+      final matchesGenre =
+          selectedGenre == 'Semua' || novel.genre == selectedGenre;
       return matchesSearch && matchesGenre;
     }).toList();
 
@@ -85,11 +136,13 @@ class _HomePageState extends State<HomePage> {
             itemBuilder: (context, index) {
               final novel = filteredNovels[index];
               final isFavorite = widget.favorites.contains(novel);
+              final isInLibrary = widget.library.contains(novel);
               return NovelCard(
                 novel: novel,
                 isFavorite: isFavorite,
                 onToggleFavorite: () => widget.onToggleFavorite(novel),
                 onAddToLibrary: () => widget.onAddToLibrary(novel),
+                isInLibrary: isInLibrary,
               );
             },
           ),
@@ -103,13 +156,40 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
+    final q = searchQuery.trim().toLowerCase();
+
+    // Show Populer only when:
+    // - selectedGenre == 'Semua', AND
+    // - (search kosong) OR (search has matches inside populerNovels)
+    final filteredPopulerMatches = populerNovels.where((novel) {
+      if (q.isEmpty) return true;
+      final t = novel.title.toLowerCase();
+      final a = novel.author.toLowerCase();
+      final g = novel.genre.toLowerCase();
+      return t.contains(q) || a.contains(q) || g.contains(q);
+    }).toList();
+
+    final showPopuler =
+        selectedGenre == 'Semua' &&
+        (q.isEmpty || filteredPopulerMatches.isNotEmpty);
 
     return Scaffold(
       appBar: AppBar(
         elevation: 4,
         title: Text(
           greetings[currentGreetingIndex],
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.white, // putih jelas
+            shadows: [
+              Shadow(
+                offset: Offset(0, 1),
+                blurRadius: 3,
+                color: Colors.black26,
+              ),
+            ],
+          ),
         ),
         centerTitle: true,
       ),
@@ -117,8 +197,16 @@ class _HomePageState extends State<HomePage> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: isDark
-                ? [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)]
-                : [Color(0xFFE1F5FE), Color(0xFFB2EBF2), Color(0xFFB39DDB)],
+                ? [
+                    const Color(0xFF0F2027),
+                    const Color(0xFF203A43),
+                    const Color(0xFF2C5364),
+                  ]
+                : [
+                    const Color(0xFFE1F5FE),
+                    const Color(0xFFB2EBF2),
+                    const Color(0xFFB39DDB),
+                  ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -138,8 +226,13 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
-              Text('Halo Readers 👋',
-                  style: GoogleFonts.poppins(fontSize: 26, fontWeight: FontWeight.bold)),
+              Text(
+                'Halo Readers 👋',
+                style: GoogleFonts.poppins(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 8),
               // Search Bar dengan Filter Genre
               Column(
@@ -149,14 +242,19 @@ class _HomePageState extends State<HomePage> {
                       hintText: '🔍 Cari novel, penulis, atau genre...',
                       filled: true,
                       fillColor: isDark ? Colors.grey[800] : Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          showGenreFilters ? Icons.filter_alt : Icons.filter_alt_outlined,
+                          showGenreFilters
+                              ? Icons.filter_alt
+                              : Icons.filter_alt_outlined,
                           color: colorScheme.primary,
                         ),
                         onPressed: () {
@@ -189,19 +287,23 @@ class _HomePageState extends State<HomePage> {
                               });
                             },
                             selectedColor: colorScheme.primary.withOpacity(0.2),
-                            backgroundColor: isDark ? Colors.grey[700] : Colors.grey[200],
+                            backgroundColor: isDark
+                                ? Colors.grey[700]
+                                : Colors.grey[200],
                             labelStyle: TextStyle(
-                              color: selectedGenre == genre 
-                                  ? colorScheme.primary 
-                                  : Theme.of(context).textTheme.bodyMedium?.color,
+                              color: selectedGenre == genre
+                                  ? colorScheme.primary
+                                  : Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium?.color,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                             showCheckmark: false,
                             side: BorderSide(
-                              color: selectedGenre == genre 
-                                  ? colorScheme.primary 
+                              color: selectedGenre == genre
+                                  ? colorScheme.primary
                                   : Colors.transparent,
                             ),
                           );
@@ -211,7 +313,9 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
               const SizedBox(height: 24),
-              buildSection('📚 Populer', populerNovels),
+
+              // ---------- SHOW POPULER with corrected logic ----------
+              if (showPopuler) buildPopulerSection('📚 Populer', populerNovels),
               buildSection('❤️ Romantis', romantisNovels),
               buildSection('🧙 Fantasi', fantasiNovels),
               buildSection('👻 Horor', hororNovels),
@@ -247,6 +351,7 @@ class NovelCard extends StatelessWidget {
   final bool isFavorite;
   final VoidCallback onToggleFavorite;
   final VoidCallback onAddToLibrary;
+  final bool isInLibrary; // <-- NEW
 
   const NovelCard({
     super.key,
@@ -254,6 +359,7 @@ class NovelCard extends StatelessWidget {
     required this.isFavorite,
     required this.onToggleFavorite,
     required this.onAddToLibrary,
+    required this.isInLibrary, // <-- NEW
   });
 
   @override
@@ -262,9 +368,7 @@ class NovelCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => DetailPage(novel: novel),
-          ),
+          MaterialPageRoute(builder: (context) => DetailPage(novel: novel)),
         );
       },
       child: Container(
@@ -285,7 +389,9 @@ class NovelCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(14),
+              ),
               child: Image.asset(
                 novel.imagePath,
                 height: 180,
@@ -326,7 +432,13 @@ class NovelCard extends StatelessWidget {
                         onPressed: onToggleFavorite,
                       ),
                       IconButton(
-                        icon: const Icon(Icons.library_add, size: 20),
+                        icon: Icon(
+                          isInLibrary ? Icons.check_circle : Icons.library_add,
+                          color: isInLibrary ? Colors.green : null,
+                          size: 25,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                         onPressed: onAddToLibrary,
                       ),
                     ],
